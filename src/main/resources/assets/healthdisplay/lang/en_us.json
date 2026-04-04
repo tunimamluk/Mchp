@@ -1,0 +1,38 @@
+{
+  "config.healthdisplay.title": "Health Display Settings",
+  "config.healthdisplay.category.general": "General",
+
+  "config.healthdisplay.enabled": "Enable Health Display",
+  "config.healthdisplay.enabled.tooltip": "Show or hide the numeric HP counter on the HUD.",
+
+  "config.healthdisplay.position": "Position",
+  "config.healthdisplay.position.top_left": "Top Left",
+  "config.healthdisplay.position.top_right": "Top Right",
+  "config.healthdisplay.position.bottom_left": "Bottom Left",
+  "config.healthdisplay.position.bottom_right": "Bottom Right",
+  "config.healthdisplay.position.above_health_bar": "Above Health Bar",
+
+  "config.healthdisplay.format": "Display Format",
+  "config.healthdisplay.format.numeric": "Numeric  (14 HP)",
+  "config.healthdisplay.format.fraction": "Fraction  (14 / 20)",
+  "config.healthdisplay.format.percentage": "Percentage  (70%)",
+  "config.healthdisplay.format.with_icon": "With Icon  (\u2764 14)",
+
+  "config.healthdisplay.color_mode": "Colour Mode",
+  "config.healthdisplay.color_mode.static": "Static (custom colour below)",
+  "config.healthdisplay.color_mode.dynamic": "Dynamic (green \u2192 yellow \u2192 red)",
+
+  "config.healthdisplay.static_color": "Static Colour",
+  "config.healthdisplay.static_color.tooltip": "Only used when Colour Mode is set to Static.",
+
+  "config.healthdisplay.font_size": "Font Size",
+  "config.healthdisplay.font_size.small": "Small (0.75\u00d7)",
+  "config.healthdisplay.font_size.medium": "Medium (1\u00d7)",
+  "config.healthdisplay.font_size.large": "Large (1.5\u00d7)",
+
+  "config.healthdisplay.show_background": "Show Background",
+  "config.healthdisplay.show_background.tooltip": "Draw a semi-transparent pill behind the text.",
+
+  "config.healthdisplay.show_decimals": "Show Decimals",
+  "config.healthdisplay.show_decimals.tooltip": "Display half-hearts as .5 (e.g. 13.5 HP) instead of rounding down."
+}

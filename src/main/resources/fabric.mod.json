@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "healthdisplay",
+  "version": "${version}",
+  "name": "Health Display",
+  "description": "Shows your current health as a numeric HP counter on the HUD, with a configurable position, format, colour, and font size.",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.healthdisplay.HealthDisplayMod"
+    ],
+    "modmenu": [
+      "com.example.healthdisplay.HealthDisplayModMenu"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "fabric-api": "*",
+    "cloth-config": "*",
+    "modmenu": "*",
+    "minecraft": "~1.21.4"
+  }
+}

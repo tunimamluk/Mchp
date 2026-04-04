@@ -1,0 +1,19 @@
+.gradle/
+build/
+run/
+out/
+
+*.class
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
