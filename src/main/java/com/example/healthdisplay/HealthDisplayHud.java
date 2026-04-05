@@ -10,6 +10,10 @@ public final class HealthDisplayHud {
 
     private HealthDisplayHud() {}
 
+    // Blink state for the gap reminder
+    private static long    lastBlinkToggle = 0L;
+    private static boolean blinkVisible    = true;
+
     // ─────────────────────────────────────────────────────────────────────────
     // Entry point (registered via HudRenderCallback)
     // ─────────────────────────────────────────────────────────────────────────
@@ -25,21 +29,41 @@ public final class HealthDisplayHud {
         float health    = player.getHealth();
         float maxHealth = player.getMaxHealth();
 
-        String text  = buildText(cfg, health, maxHealth);
-        int    color = computeColor(cfg, health, maxHealth);
-        float  scale = scaleOf(cfg.fontSize);
-
         TextRenderer tr = client.textRenderer;
         int sw = client.getWindow().getScaledWidth();
         int sh = client.getWindow().getScaledHeight();
+
+        // ── Gap reminder ─────────────────────────────────────────────────────
+        boolean gapActive = cfg.gapEnabled && health < cfg.gapThreshold;
+
+        if (gapActive) {
+            switch (cfg.reminderStyle) {
+                case BLINK -> {
+                    long now = System.currentTimeMillis();
+                    if (now - lastBlinkToggle >= 500) {
+                        blinkVisible    = !blinkVisible;
+                        lastBlinkToggle = now;
+                    }
+                    if (!blinkVisible) return;   // hide entire counter on "off" phase
+                }
+                case VIGNETTE     -> renderVignette(drawContext, sw, sh);
+                case TITLE        -> renderGapTitle(drawContext, tr, cfg, sw, sh);
+                case OVERLAY_TEXT -> { /* rendered after the main counter */ }
+            }
+        }
+
+        // ── Main HP counter ──────────────────────────────────────────────────
+        String text  = buildText(cfg, health, maxHealth);
+        int    color = computeColor(cfg, health, maxHealth);
+        float  scale = scaleOf(cfg.fontSize);
 
         // Text dimensions in screen-space (scaled)
         int textW = Math.round(tr.getWidth(text) * scale);
         int textH = Math.round(tr.fontHeight    * scale);
 
-        int[] pos     = computePosition(cfg, sw, sh, textW, textH);
-        int screenX   = pos[0];
-        int screenY   = pos[1];
+        int[] pos   = computePosition(cfg, sw, sh, textW, textH);
+        int screenX = pos[0];
+        int screenY = pos[1];
 
         // Push a scaled matrix so the text and background are enlarged/shrunk
         // together.  All draw calls inside use pre-scaled coords (= screen / scale).
@@ -62,6 +86,63 @@ public final class HealthDisplayHud {
 
         drawContext.drawText(tr, text, dx, dy, color, true);
         matrices.popMatrix();
+
+        // ── Overlay text reminder (drawn after counter) ──────────────────────
+        if (gapActive && cfg.reminderStyle == HealthDisplayConfig.ReminderStyle.OVERLAY_TEXT) {
+            renderOverlayLabel(drawContext, tr, cfg, screenX, screenY + textH + 2, scale);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Gap reminder renderers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /** Red gradient fills at all four screen edges. */
+    private static void renderVignette(DrawContext ctx, int sw, int sh) {
+        int edge = sh / 4;       // ~25 % of screen height
+        int col  = 0xBBFF0000;   // semi-transparent red
+        int none = 0x00FF0000;   // transparent red (keeps gradient colour channel)
+        ctx.fillGradient(0,         0,         sw,        edge,    col,  none);  // top
+        ctx.fillGradient(0,         sh - edge, sw,        sh,      none, col);   // bottom
+        ctx.fill(        0,         edge,      sw / 8,    sh - edge, 0x60FF0000); // left
+        ctx.fill(        sw - sw/8, edge,      sw,        sh - edge, 0x60FF0000); // right
+    }
+
+    /** Large red "EAT GAPPLE!" text centred on screen. */
+    private static void renderGapTitle(DrawContext ctx, TextRenderer tr,
+                                        HealthDisplayConfig cfg, int sw, int sh) {
+        String msg   = "EAT " + gapLabel(cfg.gapName) + "!";
+        float  scale = 2.0f;
+        var    mats  = ctx.getMatrices();
+        mats.pushMatrix();
+        mats.scale(scale, scale);
+        ctx.drawCenteredTextWithShadow(tr, msg,
+                Math.round(sw / 2f / scale),
+                Math.round(sh / 2f / scale) - tr.fontHeight,
+                0xFF5555);
+        mats.popMatrix();
+    }
+
+    /** Small "⚠ GAPPLE!" label rendered just below the HP counter. */
+    private static void renderOverlayLabel(DrawContext ctx, TextRenderer tr,
+                                            HealthDisplayConfig cfg,
+                                            int x, int y, float scale) {
+        String msg  = "\u26a0 " + gapLabel(cfg.gapName) + "!";
+        var    mats = ctx.getMatrices();
+        mats.pushMatrix();
+        mats.scale(scale, scale);
+        float inv = 1f / scale;
+        ctx.drawText(tr, msg, Math.round(x * inv), Math.round(y * inv), 0xFF5555, true);
+        mats.popMatrix();
+    }
+
+    /** Human-readable label for the gap name setting. */
+    private static String gapLabel(HealthDisplayConfig.GapName name) {
+        return switch (name) {
+            case GOLDEN_APPLE -> "GOLDEN APPLE";
+            case GAPPLE       -> "GAPPLE";
+            case GAP          -> "GAP";
+        };
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -95,12 +176,12 @@ public final class HealthDisplayHud {
         int r, g;
         if (ratio >= 0.5f) {
             // upper half: r ramps 0x55 → 0xFF as ratio drops from 1.0 to 0.5
-            float t = (ratio - 0.5f) * 2.0f;         // 1 at full health, 0 at 50%
+            float t = (ratio - 0.5f) * 2.0f;
             r = 0x55 + Math.round((1.0f - t) * (0xFF - 0x55));
             g = 0xFF;
         } else {
             // lower half: g ramps 0xFF → 0x55 as ratio drops from 0.5 to 0
-            float t = ratio * 2.0f;                   // 1 at 50%, 0 at death
+            float t = ratio * 2.0f;
             r = 0xFF;
             g = 0x55 + Math.round(t * (0xFF - 0x55));
         }
@@ -131,16 +212,16 @@ public final class HealthDisplayHud {
      */
     private static int[] computePosition(HealthDisplayConfig cfg,
                                           int sw, int sh, int tw, int th) {
-        final int MARGIN  = 5;
-        final int HOTBAR  = 22;  // height of the vanilla hotbar strip
-        final int HEARTS_OFFSET = 55; // empirical offset to clear the hearts row
+        final int MARGIN        = 5;
+        final int HOTBAR        = 22;
+        final int HEARTS_OFFSET = 55;
 
         return switch (cfg.position) {
-            case TOP_LEFT    -> new int[]{ MARGIN,               MARGIN };
-            case TOP_RIGHT   -> new int[]{ sw - tw - MARGIN,     MARGIN };
-            case BOTTOM_LEFT -> new int[]{ MARGIN,               sh - th - MARGIN - HOTBAR };
-            case BOTTOM_RIGHT-> new int[]{ sw - tw - MARGIN,     sh - th - MARGIN - HOTBAR };
-            case ABOVE_HEALTH_BAR -> new int[]{ sw / 2 - tw / 2, sh - th - HEARTS_OFFSET };
+            case TOP_LEFT         -> new int[]{ MARGIN,               MARGIN };
+            case TOP_RIGHT        -> new int[]{ sw - tw - MARGIN,     MARGIN };
+            case BOTTOM_LEFT      -> new int[]{ MARGIN,               sh - th - MARGIN - HOTBAR };
+            case BOTTOM_RIGHT     -> new int[]{ sw - tw - MARGIN,     sh - th - MARGIN - HOTBAR };
+            case ABOVE_HEALTH_BAR -> new int[]{ sw / 2 - tw / 2,      sh - th - HEARTS_OFFSET };
         };
     }
 }

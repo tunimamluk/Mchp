@@ -34,5 +34,23 @@
   "config.healthdisplay.show_background.tooltip": "Draw a semi-transparent pill behind the text.",
 
   "config.healthdisplay.show_decimals": "Show Decimals",
-  "config.healthdisplay.show_decimals.tooltip": "Display half-hearts as .5 (e.g. 13.5 HP) instead of rounding down."
+  "config.healthdisplay.show_decimals.tooltip": "Display half-hearts as .5 (e.g. 13.5 HP) instead of rounding down.",
+
+  "config.healthdisplay.category.gap": "Gap Reminder",
+
+  "config.healthdisplay.gap_enabled": "Enable Gap Reminder",
+
+  "config.healthdisplay.gap_threshold": "HP Threshold",
+  "config.healthdisplay.gap_threshold.tooltip": "Show the reminder when HP drops below this value (0\u201320 scale, half-hearts).",
+
+  "config.healthdisplay.gap_name": "Reminder Name",
+  "config.healthdisplay.gap_name.golden_apple": "Golden Apple",
+  "config.healthdisplay.gap_name.gapple": "Gapple",
+  "config.healthdisplay.gap_name.gap": "Gap",
+
+  "config.healthdisplay.reminder_style": "Reminder Style",
+  "config.healthdisplay.reminder_style.blink": "Blink \u2013 HP counter flashes",
+  "config.healthdisplay.reminder_style.title": "Title \u2013 large centered text",
+  "config.healthdisplay.reminder_style.overlay_text": "Overlay Text \u2013 label below counter",
+  "config.healthdisplay.reminder_style.vignette": "Vignette \u2013 red screen edges"
 }

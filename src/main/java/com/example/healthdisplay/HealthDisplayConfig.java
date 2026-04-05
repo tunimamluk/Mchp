@@ -55,4 +55,19 @@ public class HealthDisplayConfig implements ConfigData {
     public enum FontSize {
         SMALL, MEDIUM, LARGE
     }
+
+    // ── Gap Reminder ─────────────────────────────────────────────────────────
+    public boolean gapEnabled     = false;
+    /** HP value (0–20 scale). Reminder fires when health is strictly below this. */
+    public int     gapThreshold   = 8;
+    public GapName       gapName       = GapName.GAPPLE;
+    public ReminderStyle reminderStyle = ReminderStyle.BLINK;
+
+    public enum GapName {
+        GOLDEN_APPLE, GAPPLE, GAP
+    }
+
+    public enum ReminderStyle {
+        BLINK, TITLE, OVERLAY_TEXT, VIGNETTE
+    }
 }

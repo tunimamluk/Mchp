@@ -125,6 +125,50 @@ public class HealthDisplayModMenu implements ModMenuApi {
                 .setSaveConsumer(v -> cfg.showDecimals = v)
                 .build());
 
+        // ── Gap Reminder category ────────────────────────────────────────────
+        ConfigCategory gap = builder.getOrCreateCategory(
+                Text.translatable("config.healthdisplay.category.gap"));
+
+        gap.addEntry(eb
+                .startBooleanToggle(
+                        Text.translatable("config.healthdisplay.gap_enabled"), cfg.gapEnabled)
+                .setDefaultValue(false)
+                .setSaveConsumer(v -> cfg.gapEnabled = v)
+                .build());
+
+        gap.addEntry(eb
+                .startIntSlider(
+                        Text.translatable("config.healthdisplay.gap_threshold"),
+                        cfg.gapThreshold, 1, 20)
+                .setDefaultValue(8)
+                .setTooltip(Text.translatable("config.healthdisplay.gap_threshold.tooltip"))
+                .setSaveConsumer(v -> cfg.gapThreshold = v)
+                .build());
+
+        gap.addEntry(eb
+                .startEnumSelector(
+                        Text.translatable("config.healthdisplay.gap_name"),
+                        HealthDisplayConfig.GapName.class,
+                        cfg.gapName)
+                .setDefaultValue(HealthDisplayConfig.GapName.GAPPLE)
+                .setEnumNameProvider(e ->
+                        Text.translatable("config.healthdisplay.gap_name."
+                                + e.name().toLowerCase()))
+                .setSaveConsumer(v -> cfg.gapName = v)
+                .build());
+
+        gap.addEntry(eb
+                .startEnumSelector(
+                        Text.translatable("config.healthdisplay.reminder_style"),
+                        HealthDisplayConfig.ReminderStyle.class,
+                        cfg.reminderStyle)
+                .setDefaultValue(HealthDisplayConfig.ReminderStyle.BLINK)
+                .setEnumNameProvider(e ->
+                        Text.translatable("config.healthdisplay.reminder_style."
+                                + e.name().toLowerCase()))
+                .setSaveConsumer(v -> cfg.reminderStyle = v)
+                .build());
+
         return builder.build();
     }
 }
