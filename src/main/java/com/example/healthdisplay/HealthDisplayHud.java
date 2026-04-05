@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 
 public final class HealthDisplayHud {
@@ -44,9 +43,10 @@ public final class HealthDisplayHud {
 
         // Push a scaled matrix so the text and background are enlarged/shrunk
         // together.  All draw calls inside use pre-scaled coords (= screen / scale).
-        MatrixStack matrices = drawContext.getMatrices();
-        matrices.push();
-        matrices.scale(scale, scale, 1.0f);
+        // In 1.21.11+ DrawContext.getMatrices() returns Matrix3x2fStack (2-D only).
+        var matrices = drawContext.getMatrices();
+        matrices.pushMatrix();
+        matrices.scale(scale, scale);
 
         float inv  = 1.0f / scale;
         int   dx   = Math.round(screenX * inv);
@@ -61,7 +61,7 @@ public final class HealthDisplayHud {
         }
 
         drawContext.drawText(tr, text, dx, dy, color, true);
-        matrices.pop();
+        matrices.popMatrix();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
